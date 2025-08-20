@@ -4875,13 +4875,83 @@ document.addEventListener('DOMContentLoaded', () => {
         header.style.marginBottom = '15px';
         container.appendChild(header);
         
-        // Lista de códigos
+        // Container da tabela com scroll
+        const tableContainer = document.createElement('div');
+        tableContainer.className = 'codigos-table-container';
+        
+        // Criar tabela
+        const table = document.createElement('table');
+        table.className = 'codigos-table';
+        
+        // Cabeçalho da tabela
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>Código</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Valor (R$)</th>
+                <th>Status</th>
+                <th>Correção</th>
+                <th>Períodos</th>
+                <th>Ações</th>
+            </tr>
+        `;
+        table.appendChild(thead);
+        
+        // Corpo da tabela
+        const tbody = document.createElement('tbody');
         progoiasCodigosEncontrados.forEach((codigo, index) => {
-            const codigoDiv = criarElementoCorrecaoProgoias(codigo, index);
-            container.appendChild(codigoDiv);
+            const row = criarLinhaCodigoProgoias(codigo, index);
+            tbody.appendChild(row);
         });
+        table.appendChild(tbody);
+        
+        tableContainer.appendChild(table);
+        container.appendChild(tableContainer);
         
         addLog(`ProGoiás: Encontrados ${progoiasCodigosEncontrados.length} códigos de ajuste E111 para possível correção`, 'info');
+    }
+    
+    function criarLinhaCodigoProgoias(codigo, index) {
+        const row = document.createElement('tr');
+        const isMultiple = progoiasIsMultiplePeriods || (codigo.periodos && codigo.periodos.length > 1);
+        const isIncentivado = codigo.isIncentivado || false;
+        
+        row.innerHTML = `
+            <td class="codigo-cell">${codigo.codigo}</td>
+            <td>${codigo.tipo || 'CRÉDITO'}</td>
+            <td class="descricao-cell" title="${codigo.descricao}">${codigo.descricao}</td>
+            <td class="valor-cell">${codigo.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+            <td>
+                <span class="badge-${isIncentivado ? 'incentivado' : 'nao-incentivado'}">
+                    ${isIncentivado ? 'Incentivado' : 'Não Incentivado'}
+                </span>
+            </td>
+            <td>
+                <input type="text" 
+                       id="novoCodigo_progoias_${index}" 
+                       placeholder="Código correto..."
+                       class="codigo-input"
+                       onchange="atualizarNovoCodigoProgoias(${index}, this.value)">
+            </td>
+            <td>
+                ${isMultiple ? `
+                    <div style="font-size: 11px;">
+                        <label><input type="radio" name="aplicacao_progoias_${index}" value="todos" checked onchange="alterarAplicacaoProgoias(${index}, 'todos')"> Todos</label><br>
+                        <label><input type="radio" name="aplicacao_progoias_${index}" value="especificos" onchange="alterarAplicacaoProgoias(${index}, 'especificos')"> Específicos</label>
+                    </div>
+                ` : '<span style="font-size: 11px; color: #666;">Período único</span>'}
+            </td>
+            <td>
+                <button onclick="removerCodigoCorrecaoProgoias(${index})" 
+                        style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px;">
+                    Remover
+                </button>
+            </td>
+        `;
+        
+        return row;
     }
     
     function criarElementoCorrecaoProgoias(codigo, index) {
@@ -5048,13 +5118,87 @@ document.addEventListener('DOMContentLoaded', () => {
         header.style.marginBottom = '15px';
         container.appendChild(header);
         
+        // Container da tabela com scroll
+        const tableContainer = document.createElement('div');
+        tableContainer.className = 'codigos-table-container';
+        
+        // Criar tabela
+        const table = document.createElement('table');
+        table.className = 'codigos-table';
+        
+        // Cabeçalho da tabela
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>Origem</th>
+                <th>Código</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Valor (R$)</th>
+                <th>Status</th>
+                <th>Correção</th>
+                <th>Períodos</th>
+                <th>Ações</th>
+            </tr>
+        `;
+        table.appendChild(thead);
+        
+        // Corpo da tabela
+        const tbody = document.createElement('tbody');
         progoiasCodigosEncontradosC197D197.forEach((codigo, index) => {
-            const codigoDiv = criarElementoCodigoCorrecaoC197D197Progoias(codigo, index);
-            container.appendChild(codigoDiv);
+            const row = criarLinhaCodigoC197D197Progoias(codigo, index);
+            tbody.appendChild(row);
         });
+        table.appendChild(tbody);
+        
+        tableContainer.appendChild(table);
+        container.appendChild(tableContainer);
         
         section.style.display = 'block';
         addLog(`Encontrados ${progoiasCodigosEncontradosC197D197.length} códigos de ajuste C197/D197 ProGoiás para possível correção`, 'info');
+    }
+    
+    function criarLinhaCodigoC197D197Progoias(codigo, index) {
+        const row = document.createElement('tr');
+        const isMultiple = progoiasIsMultiplePeriodsC197D197 || (codigo.periodos && codigo.periodos.length > 1);
+        
+        row.innerHTML = `
+            <td>
+                <span class="badge-registro">${codigo.origem}</span>
+            </td>
+            <td class="codigo-cell">${codigo.codigo}</td>
+            <td>${codigo.tipo || 'AJUSTE'}</td>
+            <td class="descricao-cell" title="${codigo.descricao || 'Código de ajuste'}">${codigo.descricao || 'Código de ajuste'}</td>
+            <td class="valor-cell">${codigo.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+            <td>
+                <span class="badge-${codigo.incentivado ? 'incentivado' : 'nao-incentivado'}">
+                    ${codigo.incentivado ? 'Incentivado' : 'Não Incentivado'}
+                </span>
+            </td>
+            <td>
+                <input type="text" 
+                       id="novoCodigoC197D197_progoias_${index}" 
+                       placeholder="Código correto..."
+                       class="codigo-input"
+                       onchange="atualizarCodigoCorrecaoC197D197Progoias(${index}, this.value)">
+            </td>
+            <td>
+                ${isMultiple ? `
+                    <div style="font-size: 11px;">
+                        <label><input type="radio" name="aplicacaoC197D197_progoias_${index}" value="todos" checked onchange="alterarAplicacaoC197D197Progoias(${index}, 'todos')"> Todos</label><br>
+                        <label><input type="radio" name="aplicacaoC197D197_progoias_${index}" value="especificos" onchange="alterarAplicacaoC197D197Progoias(${index}, 'especificos')"> Específicos</label>
+                    </div>
+                ` : '<span style="font-size: 11px; color: #666;">Período único</span>'}
+            </td>
+            <td>
+                <button onclick="removerCodigoCorrecaoC197D197Progoias(${index})" 
+                        style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px;">
+                    Remover
+                </button>
+            </td>
+        `;
+        
+        return row;
     }
     
     // CLAUDE-FISCAL: Criar elemento de correção para código C197/D197 ProGoiás
@@ -5326,46 +5470,63 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        let html = '<h3>🔧 Configuração de CFOPs Genéricos - ProGoiás</h3>';
-        html += '<p>Os seguintes CFOPs genéricos foram encontrados. Configure se devem ser tratados como incentivados ou não incentivados:</p>';
+        // Cabeçalho
+        const header = document.createElement('h3');
+        header.textContent = '🔧 Configuração de CFOPs Genéricos - ProGoiás';
+        header.style.marginBottom = '10px';
+        container.appendChild(header);
         
-        html += '<div class="cfops-individuais">';
-        progoiasCfopsGenericosEncontrados.forEach((cfopInfo, index) => {
-            html += `
-                <div class="cfop-individual-item">
-                    <div class="cfop-info">
-                        <strong>CFOP ${cfopInfo.cfop}</strong> - ${cfopInfo.descricao}<br>
-                        <small>Registro: ${cfopInfo.tipoRegistro}[${cfopInfo.indiceRegistro + 1}] | 
-                        Valor Op: R$ ${cfopInfo.valorOperacao.toLocaleString('pt-BR', {minimumFractionDigits: 2})} | 
-                        ICMS: R$ ${cfopInfo.valorIcms.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</small>
-                    </div>
-                    <div class="cfop-opcoes">
-                        <label>
-                            <input type="radio" name="progoias_cfop_${index}" value="incentivado">
-                            Incentivado
-                        </label>
-                        <label>
-                            <input type="radio" name="progoias_cfop_${index}" value="nao-incentivado">
-                            Não Incentivado
-                        </label>
-                        <label>
-                            <input type="radio" name="progoias_cfop_${index}" value="padrao" checked>
-                            Padrão (não altera classificação original)
-                        </label>
-                    </div>
-                </div>
-            `;
-        });
-        html += '</div>';
+        const description = document.createElement('p');
+        description.textContent = 'Os seguintes CFOPs genéricos foram encontrados. Configure se devem ser tratados como incentivados ou não incentivados:';
+        description.style.marginBottom = '20px';
+        container.appendChild(description);
         
-        html += `
-            <div class="cfop-actions">
-                <button id="btnAplicarCfopsProgoias" class="btn btn-primary">Aplicar Configurações</button>
-                <button id="btnPularCfopsProgoias" class="btn btn-secondary">Pular (manter classificações originais)</button>
-            </div>
+        // Container da tabela com scroll
+        const tableContainer = document.createElement('div');
+        tableContainer.className = 'codigos-table-container cfops-table-container';
+        
+        // Criar tabela
+        const table = document.createElement('table');
+        table.className = 'codigos-table cfops-table';
+        
+        // Cabeçalho da tabela
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>CFOP</th>
+                <th>Descrição</th>
+                <th>Registro</th>
+                <th>Valor Operação (R$)</th>
+                <th>ICMS (R$)</th>
+                <th>Classificação</th>
+            </tr>
         `;
+        table.appendChild(thead);
         
-        container.innerHTML = html;
+        // Corpo da tabela
+        const tbody = document.createElement('tbody');
+        progoiasCfopsGenericosEncontrados.forEach((cfopInfo, index) => {
+            const row = criarLinhaCfopGenericoProgoias(cfopInfo, index);
+            tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        
+        tableContainer.appendChild(table);
+        container.appendChild(tableContainer);
+        
+        // Botões de ação
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'cfop-actions';
+        actionsDiv.style.cssText = 'margin-top: 20px; text-align: center;';
+        actionsDiv.innerHTML = `
+            <button id="btnAplicarCfopsProgoias" class="btn btn-primary" style="margin-right: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Aplicar Configurações
+            </button>
+            <button id="btnPularCfopsProgoias" class="btn btn-secondary" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Pular (manter classificações originais)
+            </button>
+        `;
+        container.appendChild(actionsDiv);
         container.style.display = 'block';
         
         // Adicionar event listeners
@@ -5373,6 +5534,36 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btnPularCfopsProgoias').addEventListener('click', pularCfopsEContinuarProgoias);
         
         addLog(`Encontrados ${progoiasCfopsGenericosEncontrados.length} CFOPs genéricos no SPED ProGoiás para configuração`, 'info');
+    }
+    
+    function criarLinhaCfopGenericoProgoias(cfopInfo, index) {
+        const row = document.createElement('tr');
+        
+        row.innerHTML = `
+            <td class="cfop-cell">${cfopInfo.cfop}</td>
+            <td class="descricao-cfop-cell">${cfopInfo.descricao}</td>
+            <td>
+                <span class="badge-registro">${cfopInfo.tipoRegistro}[${cfopInfo.indiceRegistro + 1}]</span>
+            </td>
+            <td class="valor-cfop-cell">${cfopInfo.valorOperacao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+            <td class="valor-cfop-cell">${cfopInfo.valorIcms.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+            <td>
+                <div class="radio-option">
+                    <input type="radio" name="progoias_cfop_${index}" value="incentivado" id="incentivado_progoias_${index}">
+                    <label for="incentivado_progoias_${index}" class="radio-label incentivado">Incentivado</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" name="progoias_cfop_${index}" value="nao-incentivado" id="nao_incentivado_progoias_${index}">
+                    <label for="nao_incentivado_progoias_${index}" class="radio-label nao-incentivado">Não Incentivado</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" name="progoias_cfop_${index}" value="padrao" id="padrao_progoias_${index}" checked>
+                    <label for="padrao_progoias_${index}" class="radio-label">Padrão</label>
+                </div>
+            </td>
+        `;
+        
+        return row;
     }
     
     function aplicarCfopsEContinuarProgoias() {
